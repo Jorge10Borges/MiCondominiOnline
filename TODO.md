@@ -1,0 +1,18 @@
+# Lista de tareas pendientes (TODO)
+
+- [ ] Proteger rutas y componentes según el rol del usuario (superusuario, admin, propietario)
+- [ ] Implementar autenticación real con JWT
+- [ ] Obtener el rol del usuario desde el backend y contexto global
+- [ ] Proteger la página de Organizaciones para solo superusuario
+- [ ] Implementar CRUD de organizaciones (crear, editar, eliminar)
+- [ ] Implementar gestión de administradores por organización
+- [ ] Implementar gestión de sectores y unidades
+- [ ] Implementar gestión de propietarios y su asignación a unidades
+- [ ] Implementar gestión de pagos, gastos, comunicados y reportes
+- [ ] Personalización básica por condominio (logo, colores)
+- [ ] Sistema de licencias y expiración por organización
+- [ ] Mejorar la documentación técnica y de usuario
+- [ ] Pruebas de seguridad y aislamiento multi-tenant
+- [ ] Mejorar la experiencia de usuario y diseño visual
+
+Puedes agregar, editar o marcar como completadas las tareas según avances.

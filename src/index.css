@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@theme {
+  --color-Regalia: #503D8B;
+  --color-Oxford-Blue: #1F3250;
+  --color-Teal-Blue: #2A7B9B;
+  --color-Forest-Green: #265E18;
+
+
+
+}
