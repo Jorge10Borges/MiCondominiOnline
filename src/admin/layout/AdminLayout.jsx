@@ -5,7 +5,7 @@ export default function AdminLayout({ children }) {
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr] bg-blue-50">
       <Nav />
-      <main className="container mx-auto p-4 h-full">
+      <main className="w-full mx-auto p-4 h-full">
         {children}
       </main>
     </div>
