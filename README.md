@@ -1,5 +1,3 @@
-
-
 # 1. 🏢 MiCondominioOnline
 
 **Sistema digital para la gestión transparente y participativa de condominios.**  
@@ -499,3 +497,15 @@ Comprometido con el desarrollo comunitario mediante tecnología accesible, trans
 # 16. 📫 Contacto
 
 Para colaboración técnica o institucional, contactar al autor por canales definidos en la Junta.
+
+---
+
+## Estilos de botones principales
+
+Para todos los botones principales de agregar (por ejemplo: "Agregar organización", "Agregar sector", "Agregar apartamento/casa"), se debe usar la siguiente clase:
+
+```
+bg-Regalia text-white px-4 py-2 rounded shadow hover:bg-purple-800 transition cursor-pointer
+```
+
+Esto asegura consistencia visual y accesibilidad en toda la aplicación.

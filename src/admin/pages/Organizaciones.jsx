@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import OrganizacionModal from '../components/organizaciones/OrganizacionModal';
-import OrganizacionInfo from '../components/organizaciones/OrganizacionInfo';
+import OrganizacionModal from '../components/Organizaciones/OrganizacionModal';
+import OrganizacionInfo from '../components/Organizaciones/OrganizacionInfo';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import TrashIcon from '../assets/images/trash.svg?react';
 import PenIcon from '../assets/images/pen.svg?react';
 import InfoIcon from '../assets/images/info.svg?react';
+import AddIcon from '../assets/images/plusLarge.svg?react'; // Icono para agregar organización
 
 
 // Lista simulada de organizaciones
@@ -120,7 +121,8 @@ export default function Organizaciones() {
           className="bg-Regalia text-white px-4 py-2 rounded shadow hover:bg-purple-800 transition"
           onClick={handleAgregar}
         >
-          + Agregar Organización
+          <AddIcon className="w-5 h-5 me-1 inline" />
+          Agregar Organización
         </button>
       </div>
       <div className="bg-white rounded-xl shadow overflow-x-auto">
