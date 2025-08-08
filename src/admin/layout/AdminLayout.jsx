@@ -3,9 +3,9 @@ import Nav from '../components/Nav';
 
 export default function AdminLayout({ children }) {
   return (
-    <div className="min-h-screen grid grid-rows-[auto_1fr] bg-blue-50">
+    <div className="min-h-screen flex flex-col bg-blue-50">
       <Nav />
-      <main className="w-full mx-auto p-4 h-full">
+      <main className="flex-1 p-4">
         {children}
       </main>
     </div>

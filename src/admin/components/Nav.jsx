@@ -8,8 +8,14 @@ const Nav = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const hideMenu = location.pathname === '/admin/login';
-  // Simulación: cambiar a "admin" para probar el menú sin superusuario
-  const userRole = 'superusuario';
+  // Obtener el rol real del usuario desde localStorage
+  let userRole = '';
+  try {
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+    userRole = usuario?.rol || '';
+  } catch {
+    userRole = '';
+  }
   return (
     <nav className="p-4 text-white bg-gradient-to-r from-Oxford-Blue to-Regalia">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
@@ -40,7 +46,7 @@ const Nav = () => {
                 <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
               </button>
               <ul className="absolute left-0 top-full bg-white text-gray-800 rounded shadow-lg min-w-[180px] py-2 z-50 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-opacity">
-                {userRole === 'superusuario' && (
+                {(userRole === 'superusuario' || userRole === 'root') && (
                   <li><Link to="/admin/organizaciones" className="block px-4 py-2 hover:bg-blue-50" tabIndex={0}>Organizaciones</Link></li>
                 )}
                 <li><Link to="/admin/sectores" className="block px-4 py-2 hover:bg-blue-50" tabIndex={0}>Sectores</Link></li>
@@ -80,7 +86,7 @@ const Nav = () => {
         <ul className="md:hidden flex flex-col gap-4 mt-4 bg-gradient-to-r from-Oxford-Blue to-Regalia rounded shadow p-4 animate-fade-in">
           <li><Link to="/admin/dashboard" className="hover:underline" onClick={() => setOpen(false)}>Dashboard</Link></li>
           <li className="font-semibold mt-2">Gestión</li>
-          {userRole === 'superusuario' && (
+          {(userRole === 'superusuario' || userRole === 'root') && (
             <li><Link to="/admin/organizaciones" className="hover:underline" onClick={() => setOpen(false)}>Organizaciones</Link></li>
           )}
           <li><Link to="/admin/sectores" className="hover:underline" onClick={() => setOpen(false)}>Sectores</Link></li>

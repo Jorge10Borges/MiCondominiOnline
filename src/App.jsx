@@ -1,4 +1,5 @@
 import Organizaciones from './admin/pages/Organizaciones';
+import SectoresPage from './admin/pages/SectoresPage';
 import DashboardPropietario from './residencia/pages/Dashboard';
 import Dashboard from './admin/pages/Dashboard';
 

@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
-import SectorModal from './SectorModal';
-//import UnidadesManager from './UnidadesManager'; // Eliminado: componente no existe
-import AddIcon from '../../assets/images/plusLarge.svg?react'; // Icono para agregar organización
-import ShowIcon from '../../assets/images/eye.svg?react'; // Icono para mostrar unidades
-import TrashIcon from '../../assets/images/trash.svg?react'; // Icono para eliminar sector
-import PenIcon from '../../assets/images/Pen.svg?react'; // Icono para eliminar sector
+import SectorModal from '../components/Organizaciones/SectorModal';
+// import UnidadesModal from '../components/Organizaciones/UnidadesModal'; // Eliminado: el archivo no existe
+import AddIcon from '../assets/images/plusLarge.svg?react';
+import ShowIcon from '../assets/images/eye.svg?react';
+import TrashIcon from '../assets/images/trash.svg?react';
 
-/**
- * Componente para gestionar sectores (edificios/manzanas) y sus unidades.
- */
-export default function SectoresManager({ sectores, setSectores }) {
-  // Estado para modal de agregar/editar sector
+// Demo inicial de sectores
+const sectoresDemo = [
+  { id: 1, tipo: 'edificio', nombre: 'Edificio A', unidades: [] },
+  { id: 2, tipo: 'manzana', nombre: 'Manzana 1', unidades: [] },
+];
+
+export default function SectoresPage() {
+  const [sectores, setSectores] = useState(sectoresDemo);
   const [sectorModalOpen, setSectorModalOpen] = useState(false);
   const [sectorModalData, setSectorModalData] = useState(null);
   const [sectorModalModo, setSectorModalModo] = useState('agregar');
-  const [sectorActivo, setSectorActivo] = useState(null);
-  // Estado para vista de unidades
-  const [unidadesViewOpen, setUnidadesViewOpen] = useState(false);
-  const [unidadesViewSector, setUnidadesViewSector] = useState(null);
+  const [unidadesModalOpen, setUnidadesModalOpen] = useState(false);
+  const [unidadesModalSector, setUnidadesModalSector] = useState(null);
 
   // Abrir modal para agregar sector
   const handleOpenAgregarSector = () => {
@@ -52,31 +52,25 @@ export default function SectoresManager({ sectores, setSectores }) {
   // Eliminar sector
   const handleEliminarSector = (id) => {
     setSectores(sectores.filter(s => s.id !== id));
-    if (sectorActivo === id) setSectorActivo(null);
   };
 
-  // Mostrar la vista de unidades como página/componente completo
+  // Mostrar el modal de unidades
   const handleShowUnidades = (sector) => {
-    setUnidadesViewSector(sector);
-    setUnidadesViewOpen(true);
+    setUnidadesModalSector(sector);
+    setUnidadesModalOpen(true);
   };
 
-  // Actualizar unidades de un sector desde la vista
-  const handleSetUnidadesView = (sectorId, unidades) => {
+  // Actualizar unidades de un sector desde el modal
+  const handleSetUnidadesModal = (sectorId, unidades) => {
     setSectores(sectores.map(s =>
       s.id === sectorId ? { ...s, unidades } : s
     ));
-    setUnidadesViewSector({ ...unidadesViewSector, unidades });
   };
 
-  // Render condicional: si está abierta la vista de unidades, mostrar UnidadesManager (eliminado)
-  /* Componente UnidadesManager eliminado, aquí iría la vista de unidades */
-
-  // Vista principal de sectores
   return (
-    <div className="space-y-6 col-span-full">
-      {/* Botón para abrir modal de agregar sector */}
-      <div className="flex justify-end">
+    <section className="px-2 sm:px-4 md:px-4 py-4 mx-auto w-full">
+      <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-left">Gestión de Sectores</h1>
         <button
           className="bg-Regalia text-white px-4 py-2 rounded shadow hover:bg-purple-800 transition flex items-center gap-2"
           onClick={handleOpenAgregarSector}
@@ -85,8 +79,6 @@ export default function SectoresManager({ sectores, setSectores }) {
           Agregar sector
         </button>
       </div>
-
-      {/* Tabla de sectores */}
       <div className="overflow-x-auto mt-6">
         <table className="min-w-[500px] w-full bg-white rounded-xl shadow border border-gray-200">
           <thead className="bg-blue-100">
@@ -112,8 +104,8 @@ export default function SectoresManager({ sectores, setSectores }) {
                     <button className="text-blue-600 hover:text-blue-700 cursor-pointer" title="Ver unidades" onClick={() => handleShowUnidades(sector)}>
                       <ShowIcon className="w-5 h-5 inline" />
                     </button>
-                    <button className="text-yellow-500 hover:text-purple-700 cursor-pointer" title="Editar" onClick={() => handleOpenEditarSector(sector)}>
-                      <PenIcon className="w-5 h-5 inline rotate-90" />
+                    <button className="text-purple-600 hover:text-purple-700 cursor-pointer" title="Editar" onClick={() => handleOpenEditarSector(sector)}>
+                      <AddIcon className="w-5 h-5 inline rotate-90" />
                     </button>
                     <button className="text-red-600 hover:text-red-700 cursor-pointer" title="Eliminar" onClick={() => handleEliminarSector(sector.id)}>
                       <TrashIcon className="w-5 h-5 inline" />
@@ -125,7 +117,17 @@ export default function SectoresManager({ sectores, setSectores }) {
           </tbody>
         </table>
       </div>
-
+      {/* Modal de unidades */}
+      {unidadesModalOpen && unidadesModalSector && (
+        <UnidadesModal
+          open={unidadesModalOpen}
+          onClose={() => setUnidadesModalOpen(false)}
+          unidades={unidadesModalSector.unidades}
+          setUnidades={unidades => handleSetUnidadesModal(unidadesModalSector.id, unidades)}
+          tipo={unidadesModalSector.tipo}
+          nombreSector={unidadesModalSector.nombre}
+        />
+      )}
       {/* Modal para agregar/editar sector */}
       <SectorModal
         open={sectorModalOpen}
@@ -134,6 +136,6 @@ export default function SectoresManager({ sectores, setSectores }) {
         initialData={sectorModalData}
         modo={sectorModalModo}
       />
-    </div>
+    </section>
   );
 }

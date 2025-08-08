@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../config';
 
 
 export default function LoginAdmin() {
@@ -7,16 +8,42 @@ export default function LoginAdmin() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí irá la lógica de autenticación real
-    // Simulación de login exitoso
-    navigate('/admin/dashboard');
+    setError('');
+    try {
+      const res = await fetch(`${API_BASE_URL}/login.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Error de autenticación');
+        return;
+      }
+      // Guardar token y datos de usuario
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('usuario', JSON.stringify(data.usuario));
+      // Redirigir según el rol
+      if (['admin', 'superusuario', 'root'].includes(data.usuario.rol)) {
+        navigate('/admin/dashboard');
+      } else {
+        setError('No tienes permisos para acceder al panel administrativo');
+        localStorage.removeItem('token');
+        localStorage.removeItem('usuario');
+      }
+    } catch (err) {
+      setError('Error de conexión con el servidor');
+    }
   };
 
   return (
-    <div className="h-full flex items-center justify-center bg-gray-100">
+    <div className="h-full flex items-center justify-center bg-gray-100 mt-30">
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-sm">
+        {error && <div className="mb-4 text-red-600 text-center font-semibold">{error}</div>}
         <h2 className="text-2xl font-bold mb-6 text-center">Acceso Administración</h2>
         <div className="mb-4">
           <label className="block mb-1 font-semibold">Email</label>
