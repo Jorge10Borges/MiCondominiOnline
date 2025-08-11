@@ -13,7 +13,6 @@ export default function OrganizacionModal({ open, onClose, onSave, initialData =
   const [form, setForm] = useState({
     nombre: '',
     tipo: 'condominio',
-    fecha_expiracion: '',
   });
 
   useEffect(() => {
@@ -21,7 +20,6 @@ export default function OrganizacionModal({ open, onClose, onSave, initialData =
       setForm({
         nombre: initialData.nombre || '',
         tipo: initialData.tipo || 'condominio',
-        fecha_expiracion: initialData.fecha_expiracion || '',
       });
     }
   }, [open, initialData]);
@@ -38,7 +36,7 @@ export default function OrganizacionModal({ open, onClose, onSave, initialData =
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative animate-fade-in">
         <button
           className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none"
@@ -73,17 +71,6 @@ export default function OrganizacionModal({ open, onClose, onSave, initialData =
               <option value="condominio">Condominio</option>
               <option value="urbanizacion">Urbanización</option>
             </select>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Fecha expiración licencia</label>
-            <input
-              name="fecha_expiracion"
-              type="date"
-              value={form.fecha_expiracion}
-              onChange={handleChange}
-              required
-              className="border px-3 py-2 rounded w-full"
-            />
           </div>
           <div className="flex gap-2 mt-2">
             <button

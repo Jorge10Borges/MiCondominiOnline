@@ -35,6 +35,13 @@ export default function Organizaciones() {
         });
         const data = await res.json();
         if (!res.ok) {
+          // Si el error es de token, redirigir y limpiar localStorage
+          if (data.error && (data.error.includes('Token inválido') || data.error.includes('expirado'))) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('usuario');
+            window.location.href = '/';
+            return;
+          }
           setError(data.error || 'Error al cargar organizaciones');
           setOrgs([]);
         } else {
@@ -77,9 +84,68 @@ export default function Organizaciones() {
   };
 
   // Ir a la página de información
-  const handleInfo = (org) => {
-    setInfoData(org);
-    setInfoView(true);
+  const handleInfo = async (org) => {
+    setLoading(true);
+    setError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/organizaciones.php?id=${org.id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (data.error && (data.error.includes('Token inválido') || data.error.includes('expirado'))) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('usuario');
+          window.location.href = '/';
+          return;
+        }
+        setError(data.error || 'Error al cargar organización');
+        setInfoData(null);
+        setInfoView(false);
+      } else {
+        setInfoData(data.organizacion);
+        setInfoView(true);
+      }
+    } catch (err) {
+      setError('Error de conexión con el servidor');
+      setInfoData(null);
+      setInfoView(false);
+    }
+    setLoading(false);
+  };
+
+  // Actualizar la organización en la tabla tras guardar en OrganizacionInfo
+  const handleInfoSave = async (updatedOrg) => {
+    // Recargar desde el backend para asegurar datos frescos
+    setLoading(true);
+    setError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/organizaciones.php`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Error al cargar organizaciones');
+        setOrgs([]);
+      } else {
+        setOrgs(data.organizaciones || []);
+        setInfoData(prev => ({ ...prev, ...updatedOrg }));
+      }
+    } catch (err) {
+      setError('Error de conexión con el servidor');
+      setOrgs([]);
+    }
+    setLoading(false);
   };
 
   // Volver a la tabla principal
@@ -134,7 +200,7 @@ export default function Organizaciones() {
         >
           ← Volver a la lista
         </button>
-        <OrganizacionInfo nombre={infoData.nombre} />
+        <OrganizacionInfo infoData={infoData} onSave={handleInfoSave} />
       </section>
     );
   }
@@ -200,9 +266,13 @@ export default function Organizaciones() {
                   <td className="py-3 px-2 md:px-4 align-middle whitespace-nowrap font-medium text-gray-900">{org.nombre}</td>
                   <td className="py-3 px-2 md:px-4 align-middle capitalize text-center whitespace-nowrap">{org.tipo}</td>
                   <td className="py-3 px-2 md:px-4 align-middle text-center">
-                    {org.estado_licencia === 'activa' ? (
+                    {org.estado_licencia === 'activa' && (
                       <span className="text-green-600 font-semibold">Activa</span>
-                    ) : (
+                    )}
+                    {org.estado_licencia === 'suspendida' && (
+                      <span className="text-yellow-600 font-semibold">Suspendida</span>
+                    )}
+                    {org.estado_licencia === 'vencida' && (
                       <span className="text-red-600 font-semibold">Vencida</span>
                     )}
                   </td>

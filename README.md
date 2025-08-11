@@ -292,15 +292,22 @@ Comprometido con el desarrollo comunitario mediante tecnología accesible, trans
 
    **Ejemplo de estructura para el frontend:**
 
-   ```
-   src/
-     admin/
-       components/
-       pages/
-       services/
-       hooks/
-       utils/
-       assets/
+```sql
+CREATE TABLE organizaciones (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  tipo VARCHAR(50) NOT NULL,
+  rif VARCHAR(20) DEFAULT NULL,
+  direccion VARCHAR(255) DEFAULT NULL,
+  telefonos VARCHAR(100) DEFAULT NULL,
+  email VARCHAR(100) DEFAULT NULL,
+  fecha_creacion DATE DEFAULT NULL,
+  estado_licencia VARCHAR(20) DEFAULT 'activa',
+  fecha_expiracion DATE DEFAULT NULL,
+  tipo_licencia VARCHAR(20) DEFAULT NULL,
+  costo_licencia DECIMAL(10,2) DEFAULT NULL
+);
+```
        layouts/
      residencia/
        ...
