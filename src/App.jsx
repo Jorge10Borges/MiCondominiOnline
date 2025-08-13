@@ -1,7 +1,10 @@
+
 import Organizaciones from './admin/pages/Organizaciones';
+import UnidadesPage from './admin/pages/Unidades';
 import SectoresPage from './admin/pages/SectoresPage';
 import DashboardPropietario from './residencia/pages/Dashboard';
 import Dashboard from './admin/pages/Dashboard';
+import Usuarios from './admin/pages/Usuarios';
 
 import './App.css';
 
@@ -16,10 +19,20 @@ import ResidenciaLayout from './residencia/layout/ResidenciaLayout';
 function App() {
   return (
     <Router>
-      <Routes>
+  <Routes>
+        <Route path="/admin/unidades" element={
+          <AdminLayout>
+            <UnidadesPage />
+          </AdminLayout>
+        } />
         <Route path="/admin/organizaciones" element={
           <AdminLayout>
             <Organizaciones />
+          </AdminLayout>
+        } />
+        <Route path="/admin/usuarios" element={
+          <AdminLayout>
+            <Usuarios />
           </AdminLayout>
         } />
         <Route path="/admin/login" element={

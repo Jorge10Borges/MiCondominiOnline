@@ -11,18 +11,28 @@ import React, { useState, useEffect } from 'react';
  */
 export default function SectorModal({ open, onClose, onSave, initialData = {}, modo = 'agregar' }) {
   const safeInitialData = initialData || {};
-  const [tipo, setTipo] = useState(safeInitialData.tipo || '');
-  const [nombre, setNombre] = useState(safeInitialData.nombre || '');
+  const [form, setForm] = useState({
+    tipo: safeInitialData.tipo || '',
+    nombre: safeInitialData.nombre || '',
+    numero_unidades: safeInitialData.numero_unidades || ''
+  });
 
   useEffect(() => {
-    setTipo((safeInitialData && safeInitialData.tipo) || '');
-    setNombre((safeInitialData && safeInitialData.nombre) || '');
-  }, [safeInitialData, open]);
+    setForm({
+      tipo: initialData?.tipo || '',
+      nombre: initialData?.nombre || '',
+      numero_unidades: initialData?.numero_unidades || ''
+    });
+  }, [open, initialData]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!tipo || !nombre) return;
-    onSave({ tipo, nombre });
+    if (!form.tipo || !form.nombre) return;
+    onSave({
+      tipo: form.tipo,
+      nombre: form.nombre,
+      numero_unidades: parseInt(form.numero_unidades) || 0
+    });
     onClose();
   };
 
@@ -46,8 +56,8 @@ export default function SectorModal({ open, onClose, onSave, initialData = {}, m
             <label className="block font-semibold mb-1">Tipo de sector</label>
             <select
               className="border rounded px-3 py-2 w-full"
-              value={tipo}
-              onChange={e => setTipo(e.target.value)}
+              value={form.tipo}
+              onChange={e => setForm({ ...form, tipo: e.target.value })}
               required
             >
               <option value="">Seleccione</option>
@@ -59,9 +69,18 @@ export default function SectorModal({ open, onClose, onSave, initialData = {}, m
             <label className="block font-semibold mb-1">Nombre/Identificador</label>
             <input
               className="border rounded px-3 py-2 w-full"
-              value={nombre}
-              onChange={e => setNombre(e.target.value)}
+              value={form.nombre}
+              onChange={e => setForm({ ...form, nombre: e.target.value })}
               placeholder="Ej: Edificio A, Manzana 1"
+              required
+            />
+            <label className="block font-semibold mb-1">N° Unidades</label>
+            <input
+              type="number"
+              min="0"
+              className="w-full border rounded px-3 py-2 mb-4"
+              value={form.numero_unidades}
+              onChange={e => setForm({ ...form, numero_unidades: e.target.value })}
               required
             />
           </div>

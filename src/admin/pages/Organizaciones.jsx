@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SectoresPage from './SectoresPage';
 import { API_BASE_URL } from '../../config';
 import OrganizacionModal from '../components/Organizaciones/OrganizacionModal';
 import OrganizacionInfo from '../components/Organizaciones/OrganizacionInfo';
@@ -73,14 +74,14 @@ export default function Organizaciones() {
     setModalOpen(true);
   };
 
-  // Estado para SectoresManager
-  const [sectoresOpen, setSectoresOpen] = useState(false);
+  // Estado para SectoresPage
+  const [sectoresPageOpen, setSectoresPageOpen] = useState(false);
   const [sectoresOrg, setSectoresOrg] = useState(null);
 
-  // Abrir modal de SectoresManager
+  // Abrir página de SectoresPage
   const handleSectores = (org) => {
     setSectoresOrg(org);
-    setSectoresOpen(true);
+    setSectoresPageOpen(true);
   };
 
   // Ir a la página de información
@@ -205,26 +206,16 @@ export default function Organizaciones() {
     );
   }
 
-  if (sectoresOpen && sectoresOrg) {
-    // Función para actualizar los sectores de la organización seleccionada
-    const handleSetSectores = (sectoresActualizados) => {
-      setOrgs(orgs.map(o =>
-        o.id === sectoresOrg.id ? { ...o, sectores: sectoresActualizados } : o
-      ));
-      setSectoresOrg({ ...sectoresOrg, sectores: sectoresActualizados });
-    };
+  if (sectoresPageOpen && sectoresOrg) {
     return (
       <section className="px-2 sm:px-4 md:px-4 py-4 mx-auto w-full">
         <button
           className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-700 font-medium"
-          onClick={() => { setSectoresOpen(false); setSectoresOrg(null); }}
+          onClick={() => { setSectoresPageOpen(false); setSectoresOrg(null); }}
         >
           ← Volver a Organizaciones
         </button>
-        <SectoresManager
-          sectores={sectoresOrg.sectores || []}
-          setSectores={handleSetSectores}
-        />
+        <SectoresPage organizacion={sectoresOrg} />
       </section>
     );
   }

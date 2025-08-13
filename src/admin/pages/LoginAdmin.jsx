@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../config';
-
+import { AuthContext } from '../../context/AuthContext';
 
 export default function LoginAdmin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-
   const [error, setError] = useState('');
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,16 +24,15 @@ export default function LoginAdmin() {
         setError(data.error || 'Error de autenticación');
         return;
       }
-      // Guardar token y datos de usuario
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('usuario', JSON.stringify(data.usuario));
+      // Guardar token y datos de usuario usando AuthContext
+      login(data.usuario, data.token);
       // Redirigir según el rol
       if (['admin', 'superusuario', 'root'].includes(data.usuario.rol)) {
         navigate('/admin/dashboard');
       } else {
         setError('No tienes permisos para acceder al panel administrativo');
-        localStorage.removeItem('token');
-        localStorage.removeItem('usuario');
+        // Elimina usuario y token del contexto
+        login(null, null);
       }
     } catch (err) {
       setError('Error de conexión con el servidor');

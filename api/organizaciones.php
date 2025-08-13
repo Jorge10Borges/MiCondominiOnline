@@ -81,10 +81,24 @@ if (isset($_GET['id'])) {
     exit;
 }
 
-$result = $conn->query('SELECT * FROM organizaciones');
-$organizaciones = [];
-while ($row = $result->fetch_assoc()) {
-    $organizaciones[] = $row;
+
+if (isset($_GET['usuario_id'])) {
+    $usuario_id = intval($_GET['usuario_id']);
+    $stmt = $conn->prepare('SELECT o.* FROM organizaciones o JOIN usuario_organizacion uo ON o.id = uo.organizacion_id WHERE uo.usuario_id = ?');
+    $stmt->bind_param('i', $usuario_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $organizaciones = [];
+    while ($row = $result->fetch_assoc()) {
+        $organizaciones[] = $row;
+    }
+    $stmt->close();
+} else {
+    $result = $conn->query('SELECT * FROM organizaciones');
+    $organizaciones = [];
+    while ($row = $result->fetch_assoc()) {
+        $organizaciones[] = $row;
+    }
 }
 
 // Respuesta
