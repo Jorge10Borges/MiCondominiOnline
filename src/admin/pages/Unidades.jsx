@@ -1,23 +1,77 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { API_BASE_URL } from '../../config';
+import { AuthContext } from '../../context/AuthContext';
 import PlusIcon from '../assets/images/plus.svg?react';
 
 export default function UnidadesPage() {
+  const { usuario } = useContext(AuthContext);
   const [unidades, setUnidades] = useState([]);
+  const [organizaciones, setOrganizaciones] = useState([]);
+  const [orgSeleccionada, setOrgSeleccionada] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Obtener organizaciones asignadas al usuario logueado
+    if (!usuario) return;
     setLoading(true);
-    // Aquí iría la llamada al backend para obtener las unidades
-    setTimeout(() => {
-      setUnidades([]); // Simulación de datos
-      setLoading(false);
-    }, 500);
-  }, []);
+    const token = localStorage.getItem('token');
+    fetch(`${API_BASE_URL}/organizaciones.php?usuario_id=${usuario.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        setOrganizaciones(data.organizaciones || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Error al cargar organizaciones');
+        setLoading(false);
+      });
+  }, [usuario]);
+  // Filtrar unidades por organización seleccionada
+  useEffect(() => {
+    if (!orgSeleccionada) {
+      setUnidades([]);
+      return;
+    }
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    fetch(`${API_BASE_URL}/unidades.php?organizacion_id=${orgSeleccionada}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        setUnidades(data.unidades || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Error al cargar unidades');
+        setLoading(false);
+      });
+  }, [orgSeleccionada]);
 
   return (
     <section className="sm:px-4 md:px-4 py-4 mx-auto max-w-full w-full relative">
       <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="w-full sm:w-auto mb-2 sm:mb-0">
+          <label htmlFor="orgSelect" className="block text-sm font-medium text-gray-700 mb-1">Organización</label>
+          <select
+            id="orgSelect"
+            className="w-full sm:w-64 px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+            value={orgSeleccionada}
+            onChange={e => setOrgSeleccionada(e.target.value)}
+          >
+            <option value="">Seleccione una organización</option>
+            {organizaciones.map(org => (
+              <option key={org.id} value={org.id}>{org.nombre}</option>
+            ))}
+          </select>
+        </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-left">Gestión de Unidades</h1>
         <button
           type="button"
