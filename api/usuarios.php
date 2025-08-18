@@ -43,6 +43,23 @@ if (!in_array($usuario->rol, ['superusuario', 'admin', 'root'])) {
 
 $conn = get_db_connection();
 
+// Búsqueda rápida por email: devuelve {existe: bool, usuario?: {...}}
+if (isset($_GET['email'])) {
+    $email = trim($_GET['email']);
+    if ($email === '') {
+        echo json_encode(['existe' => false]);
+        exit;
+    }
+    $stmt = $conn->prepare('SELECT id, nombre, email, rol FROM usuarios WHERE email = ? LIMIT 1');
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $user = $res->fetch_assoc();
+    $stmt->close();
+    echo json_encode($user ? ['existe' => true, 'usuario' => $user] : ['existe' => false]);
+    exit;
+}
+
 $filtroRol = $_GET['rol'] ?? '';
 $filtroOrg = $_GET['organizacion'] ?? '';
 

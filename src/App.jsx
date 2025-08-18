@@ -1,5 +1,6 @@
 
 import Organizaciones from './admin/pages/Organizaciones';
+import PropietariosPage from './admin/pages/Propietarios';
 import UnidadesPage from './admin/pages/Unidades';
 import SectoresPage from './admin/pages/SectoresPage';
 import DashboardPropietario from './residencia/pages/Dashboard';
@@ -23,6 +24,11 @@ function App() {
         <Route path="/admin/unidades" element={
           <AdminLayout>
             <UnidadesPage />
+          </AdminLayout>
+        } />
+        <Route path="/admin/propietarios" element={
+          <AdminLayout>
+            <PropietariosPage />
           </AdminLayout>
         } />
         <Route path="/admin/organizaciones" element={
