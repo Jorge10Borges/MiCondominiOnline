@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 require_once 'config.php';
 require_once 'auth.php';
+require_once 'email_service.php';
 
 // Validar JWT
 
@@ -42,6 +43,81 @@ if (!in_array($usuario->rol, ['superusuario', 'admin', 'root'])) {
 // $usuario = validar_jwt();
 
 $conn = get_db_connection();
+
+// Crear usuario (POST)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!$input) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Payload inválido']);
+        exit;
+    }
+    $nombre = isset($input['nombre']) ? trim($input['nombre']) : '';
+    $email = isset($input['email']) ? trim($input['email']) : '';
+    $dni = isset($input['dni']) ? trim($input['dni']) : '';
+    $password = isset($input['password']) ? (string)$input['password'] : ($dni ?: generateTemporaryPassword());
+    $rol = isset($input['rol']) ? trim($input['rol']) : 'usuario';
+
+    if ($nombre === '' || $email === '') {
+        http_response_code(400);
+        echo json_encode(['error' => 'Nombre y email son requeridos']);
+        exit;
+    }
+
+    // Verificar email único
+    $stmt = $conn->prepare('SELECT id FROM usuarios WHERE email = ? LIMIT 1');
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    if ($res->fetch_assoc()) {
+        http_response_code(409);
+        echo json_encode(['error' => 'El email ya está registrado']);
+        exit;
+    }
+    $stmt->close();
+
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+    // Intentar insertar con campos comunes (dni puede no existir en el esquema; manejar condicional)
+    $columns = 'nombre, email, password, rol, activo';
+    $placeholders = '?, ?, ?, ?, 1';
+    $types = 'ssss';
+    $params = [$nombre, $email, $hash, $rol];
+
+    // Verificar si existe columna dni
+    $hasDni = false;
+    if ($result = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'dni'")) {
+        $hasDni = $result->num_rows > 0;
+        $result->close();
+    }
+    if ($hasDni) {
+        $columns = 'nombre, email, password, rol, activo, dni';
+        $placeholders = '?, ?, ?, ?, 1, ?';
+        $types .= 's';
+        $params[] = $dni;
+    }
+
+    $sql = "INSERT INTO usuarios ($columns) VALUES ($placeholders)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($types, ...$params);
+    if (!$stmt->execute()) {
+        http_response_code(500);
+        echo json_encode(['error' => 'No se pudo crear el usuario']);
+        exit;
+    }
+    $newId = $stmt->insert_id;
+    $stmt->close();
+
+    $stmt = $conn->prepare('SELECT id, nombre, email, rol FROM usuarios WHERE id = ?');
+    $stmt->bind_param('i', $newId);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $user = $res->fetch_assoc();
+    $stmt->close();
+    // Enviar contraseña temporal por correo (mejor no bloquear si falla el email)
+    $emailRes = sendTemporaryPasswordEmail($email, $nombre, $password);
+    echo json_encode(['ok' => true, 'usuario' => $user, 'email_enviado' => $emailRes['ok']]);
+    exit;
+}
 
 // Búsqueda rápida por email: devuelve {existe: bool, usuario?: {...}}
 if (isset($_GET['email'])) {
