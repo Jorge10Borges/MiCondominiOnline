@@ -48,6 +48,20 @@ if (!password_verify($password, $user['password'])) {
     exit;
 }
 
+// Consultar si existe la columna must_change_password y su valor
+$mustChange = false;
+if ($result = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'must_change_password'")) {
+    if ($result->num_rows > 0) {
+        $stmt2 = $conn->prepare('SELECT must_change_password FROM usuarios WHERE id = ?');
+        $stmt2->bind_param('i', $user['id']);
+        $stmt2->execute();
+        $r2 = $stmt2->get_result();
+        $row2 = $r2->fetch_assoc();
+        $mustChange = (int)($row2['must_change_password'] ?? 0) === 1;
+        $stmt2->close();
+    }
+}
+
 $payload = [
     'id' => $user['id'],
     'email' => $user['email'],
@@ -63,6 +77,7 @@ echo json_encode([
         'id' => $user['id'],
         'nombre' => $user['nombre'],
         'email' => $user['email'],
-        'rol' => $user['rol']
+        'rol' => $user['rol'],
+        'mustChange' => $mustChange
     ]
 ]);

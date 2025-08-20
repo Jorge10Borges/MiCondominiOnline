@@ -8,6 +8,7 @@ use PHPMailer\PHPMailer\Exception;
 // Config SMTP (añade estas constantes en config.php si quieres parametrizar)
 if (!defined('SMTP_HOST')) define('SMTP_HOST', 'smtp.example.com');
 if (!defined('SMTP_PORT')) define('SMTP_PORT', 587);
+if (!defined('SMTP_SECURE')) define('SMTP_SECURE', 'tls');
 if (!defined('SMTP_USER')) define('SMTP_USER', 'user@example.com');
 if (!defined('SMTP_PASS')) define('SMTP_PASS', 'password');
 if (!defined('SMTP_FROM')) define('SMTP_FROM', 'no-reply@example.com');
@@ -21,7 +22,12 @@ function sendTemporaryPasswordEmail(string $toEmail, string $toName, string $tem
         $mail->SMTPAuth = true;
         $mail->Username = SMTP_USER;
         $mail->Password = SMTP_PASS;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        // Seleccionar cifrado según configuración
+        if (strtolower(SMTP_SECURE) === 'ssl') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } else {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        }
         $mail->Port = SMTP_PORT;
 
         $mail->setFrom(SMTP_FROM, SMTP_FROM_NAME);

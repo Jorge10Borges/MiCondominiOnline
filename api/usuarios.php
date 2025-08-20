@@ -56,7 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = isset($input['email']) ? trim($input['email']) : '';
     $dni = isset($input['dni']) ? trim($input['dni']) : '';
     $password = isset($input['password']) ? (string)$input['password'] : ($dni ?: generateTemporaryPassword());
-    $rol = isset($input['rol']) ? trim($input['rol']) : 'usuario';
+    // Rol por política: usuarios creados desde aquí deben ser 'propietario'
+    $rol = isset($input['rol']) ? trim($input['rol']) : 'propietario';
+    $rolesPermitidos = ['root','superusuario','admin','propietario'];
+    if (!in_array($rol, $rolesPermitidos, true)) {
+        $rol = 'propietario';
+    }
 
     if ($nombre === '' || $email === '') {
         http_response_code(400);
@@ -77,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->close();
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    // Intentar insertar con campos comunes (dni puede no existir en el esquema; manejar condicional)
-    $columns = 'nombre, email, password, rol, activo';
-    $placeholders = '?, ?, ?, ?, 1';
+    // Intentar insertar con columnas condicionales según existan en la tabla
+    $columns = ['nombre', 'email', 'password', 'rol', 'activo'];
+    $placeholders = ['?', '?', '?', '?', '1'];
     $types = 'ssss';
     $params = [$nombre, $email, $hash, $rol];
 
@@ -90,13 +95,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result->close();
     }
     if ($hasDni) {
-        $columns = 'nombre, email, password, rol, activo, dni';
-        $placeholders = '?, ?, ?, ?, 1, ?';
+        $columns[] = 'dni';
+        $placeholders[] = '?';
         $types .= 's';
         $params[] = $dni;
     }
 
-    $sql = "INSERT INTO usuarios ($columns) VALUES ($placeholders)";
+    // Forzar cambio de contraseña en primer inicio si existe la columna must_change_password
+    $hasMustChange = false;
+    if ($result = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'must_change_password'")) {
+        $hasMustChange = $result->num_rows > 0;
+        $result->close();
+    }
+    if ($hasMustChange) {
+        $columns[] = 'must_change_password';
+        $placeholders[] = '1';
+    }
+    $sql = "INSERT INTO usuarios (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $placeholders) . ")";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param($types, ...$params);
     if (!$stmt->execute()) {

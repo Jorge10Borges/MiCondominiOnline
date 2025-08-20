@@ -12,7 +12,9 @@ import './App.css';
 import MainLayout from './layout/MainLayout';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginAdmin from './admin/pages/LoginAdmin';
+import CambiarPassword from './admin/pages/CambiarPassword';
 import LoginPropietario from './residencia/pages/LoginPropietario';
+import CambiarPasswordPropietario from './residencia/pages/CambiarPassword';
 import AdminLayout from './admin/layout/AdminLayout';
 import ResidenciaLayout from './residencia/layout/ResidenciaLayout';
 
@@ -46,6 +48,11 @@ function App() {
             <LoginAdmin />
           </AdminLayout>
         } />
+        <Route path="/admin/cambiar-password" element={
+          <AdminLayout>
+            <CambiarPassword />
+          </AdminLayout>
+        } />
         <Route path="/admin/dashboard" element={
           <AdminLayout>
             <Dashboard />
@@ -54,6 +61,11 @@ function App() {
         <Route path="/propietario/login" element={
           <ResidenciaLayout>
             <LoginPropietario />
+          </ResidenciaLayout>
+        } />
+        <Route path="/propietario/cambiar-password" element={
+          <ResidenciaLayout>
+            <CambiarPasswordPropietario />
           </ResidenciaLayout>
         } />
         <Route path="/propietario/dashboard" element={

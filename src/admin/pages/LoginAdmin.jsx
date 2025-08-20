@@ -24,15 +24,26 @@ export default function LoginAdmin() {
         setError(data.error || 'Error de autenticación');
         return;
       }
+      // Si debe cambiar contraseña, redirigir a la página de cambio sin mantener sesión
+      const role = data.usuario?.rol;
+      const isAdminRole = ['admin', 'superusuario', 'root'].includes(role);
+      if (data.usuario?.mustChange) {
+        // Redirigir pasando el email para prellenar el formulario, según rol
+        const q = new URLSearchParams({ email }).toString();
+        if (isAdminRole) {
+          navigate(`/admin/cambiar-password?${q}`);
+        } else {
+          navigate(`/propietario/cambiar-password?${q}`);
+        }
+        return;
+      }
       // Guardar token y datos de usuario usando AuthContext
       login(data.usuario, data.token);
       // Redirigir según el rol
-      if (['admin', 'superusuario', 'root'].includes(data.usuario.rol)) {
+      if (isAdminRole) {
         navigate('/admin/dashboard');
       } else {
-        setError('No tienes permisos para acceder al panel administrativo');
-        // Elimina usuario y token del contexto
-        login(null, null);
+        navigate('/propietario/dashboard');
       }
     } catch (err) {
       setError('Error de conexión con el servidor');

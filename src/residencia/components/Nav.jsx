@@ -6,7 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 const Nav = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const hideMenu = location.pathname === '/propietario/login';
+  const hideMenu = location.pathname === '/propietario/login' || location.pathname.startsWith('/propietario/cambiar-password');
   return (
     <nav className="p-4 text-white bg-gradient-to-r from-Forest-Green to-Teal-Blue">
       <div className="flex justify-between items-center max-w-7xl mx-auto">

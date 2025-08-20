@@ -7,7 +7,11 @@ import { Link, useLocation } from 'react-router-dom';
 const Nav = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const hideMenu = location.pathname === '/admin/login';
+  const hideMenu = (
+    location.pathname === '/admin/login' ||
+    location.pathname.startsWith('/admin/cambiar-password') ||
+    location.pathname.startsWith('/propietario/')
+  );
   // Obtener el rol real del usuario desde localStorage
   let userRole = '';
   try {
