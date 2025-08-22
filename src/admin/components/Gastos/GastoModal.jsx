@@ -100,17 +100,20 @@ export default function GastoModal({ open, onClose, onSave, organizacionId, gast
     });
   };
 
-  // Equivalencia a VES (para mostrar al final del formulario)
-  const equivalenciaVes = useMemo(() => {
+  // Equivalencia siempre expresada en USD (para mostrar al final del formulario)
+  const equivalenciaUsd = useMemo(() => {
     const val = parseFloat(monto);
     if (!Number.isFinite(val)) return null;
-    // Si la moneda ya es VES devolvemos el mismo valor aunque no haya tasa
-    if (moneda === 'VES') return val;
     const vesPorUsd = tasas?.vesPorUsd; // VES por 1 USD
     const vesPorEur = tasas?.vesPorEur; // VES por 1 EUR
-    if (!vesPorUsd) return null; // sin tasa base no podemos convertir desde USD/EUR
-    if (moneda === 'USD') return val * vesPorUsd;
-    if (moneda === 'EUR' && vesPorEur) return val * vesPorEur;
+    if (moneda === 'USD') return val;
+    if (!vesPorUsd) return null; // necesitamos al menos tasa base USD
+    if (moneda === 'VES') return val / vesPorUsd; // VES -> USD
+    if (moneda === 'EUR' && vesPorEur) {
+      // USD/EUR = (VES/EUR) / (VES/USD)
+      const usdPorEur = vesPorEur / vesPorUsd;
+      return val * usdPorEur;
+    }
     return null;
   }, [monto, moneda, tasas]);
 
@@ -122,7 +125,7 @@ export default function GastoModal({ open, onClose, onSave, organizacionId, gast
         <h2 className="text-xl font-bold mb-4">{gasto ? "Editar Gasto" : "Registrar Gasto"}</h2>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <div className="md:col-span-3">
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Fecha</label>
               <input
                 type="date"
@@ -143,7 +146,7 @@ export default function GastoModal({ open, onClose, onSave, organizacionId, gast
                 required
               />
             </div>
-            <div className="gap-2">
+            <div className="md:col-span-2 gap-2">
               <label className="block text-sm font-medium mb-1">Moneda</label>
               <select
                 className="px-3 py-2 border rounded focus:outline-none focus:ring w-full"
@@ -217,9 +220,9 @@ export default function GastoModal({ open, onClose, onSave, organizacionId, gast
           </div>
           <div className="mt-4 flex justify-between items-end">
             <label className="block text-sm font-medium mb-1">
-              {equivalenciaVes != null
-                ? `Monto (VES): Bs ${equivalenciaVes.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`
-                : 'Monto (VES): —'}
+              {equivalenciaUsd != null
+                ? `Monto (USD): $ ${equivalenciaUsd.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`
+                : 'Monto (USD): —'}
             </label>
             <div className="flex justify-end gap-2 mt-6">
               <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={onClose}>
