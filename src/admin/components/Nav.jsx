@@ -68,7 +68,7 @@ const Nav = () => {
                 <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
               </button>
               <ul className="absolute left-0 top-full bg-white text-gray-800 rounded shadow-lg min-w-[150px] py-2 z-50 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-opacity">
-                <li><Link to="/admin/pagos" className="block px-4 py-2 hover:bg-blue-50" tabIndex={0}>Pagos</Link></li>
+                <li><Link to="/admin/cobros" className="block px-4 py-2 hover:bg-blue-50" tabIndex={0}>Cobros</Link></li>
                 <li><Link to="/admin/gastos" className="block px-4 py-2 hover:bg-blue-50" tabIndex={0}>Gastos</Link></li>
               </ul>
             </li>
@@ -100,7 +100,7 @@ const Nav = () => {
           <li><Link to="/admin/unidades" className="hover:underline" onClick={() => setOpen(false)}>Unidades</Link></li>
           <li><Link to="/admin/propietarios" className="hover:underline" onClick={() => setOpen(false)}>Propietarios</Link></li>
           <li className="font-semibold mt-2">Finanzas</li>
-          <li><Link to="/admin/pagos" className="hover:underline" onClick={() => setOpen(false)}>Pagos</Link></li>
+          <li><Link to="/admin/cobros" className="hover:underline" onClick={() => setOpen(false)}>Cobros</Link></li>
           <li><Link to="/admin/gastos" className="hover:underline" onClick={() => setOpen(false)}>Gastos</Link></li>
           <li className="font-semibold mt-2">Comunicaciones</li>
           <li><Link to="/admin/comunicados" className="hover:underline" onClick={() => setOpen(false)}>Comunicados</Link></li>

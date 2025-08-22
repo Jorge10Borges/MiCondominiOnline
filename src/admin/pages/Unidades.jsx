@@ -4,7 +4,7 @@ import { AuthContext } from '../../context/AuthContext';
 import PenIcon from '../assets/images/pen.svg?react';
 import TrashIcon from '../assets/images/trash.svg?react';
 import UserIcon from '../assets/images/user-hand-up.svg?react';
-import ConfirmDialog from '../../components/ConfirmDialog';
+import ConfirmDialog from '../components/ConfirmDialog';
 import ToastMessage from '../components/ToastMessage';
 import UnidadEditModal from '../components/unidades/UnidadEditModal';
 import UsuarioUnidadModal from '../components/unidades/UsuarioUnidadModal';
@@ -32,7 +32,10 @@ export default function UnidadesPage() {
     if (!usuario) return;
     setLoading(true);
     const token = localStorage.getItem('token');
-    fetch(`${API_BASE_URL}/organizaciones.php?usuario_id=${usuario.id}`, {
+    const orgsUrl = (usuario?.rol === 'superusuario' || usuario?.rol === 'root')
+      ? `${API_BASE_URL}/organizaciones.php`
+      : `${API_BASE_URL}/organizaciones.php?usuario_id=${usuario.id}`;
+    fetch(orgsUrl, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -192,6 +195,7 @@ export default function UnidadesPage() {
               <th className="py-3 px-2 md:px-4 text-center font-semibold border-b border-gray-200">Unidad</th>
               <th className="py-3 px-2 md:px-4 text-center font-semibold border-b border-gray-200">Propietario</th>
               <th className="py-3 px-2 md:px-4 text-center font-semibold border-b border-gray-200">Telefono</th>
+              <th className="py-3 px-2 md:px-4 text-center font-semibold border-b border-gray-200">Alícuota (%)</th>
               <th className="py-3 px-2 md:px-4 text-center font-semibold border-b border-gray-200">Usuario</th>
               <th className="py-3 px-2 md:px-4 text-center w-1 font-semibold border-b border-gray-200">Acciones</th>
             </tr>
@@ -207,6 +211,11 @@ export default function UnidadesPage() {
                     <td className="py-3 px-2 md:px-4 align-middle text-center whitespace-nowrap">{unidad ? unidad.identificador : <span className="text-gray-400">N/E</span>}</td>
                     <td className="py-3 px-2 md:px-4 align-middle text-center whitespace-nowrap">{unidad && unidad.propietario_nombre ? unidad.propietario_nombre : <span className="text-gray-400">N/E</span>}</td>
                     <td className="py-3 px-2 md:px-4 align-middle text-center whitespace-nowrap">{unidad && unidad.telefono ? unidad.telefono : <span className="text-gray-400">N/E</span>}</td>
+                    <td className="py-3 px-2 md:px-4 align-middle text-center whitespace-nowrap">
+                      {unidad && unidad.alicuota !== undefined && unidad.alicuota !== null && !Number.isNaN(parseFloat(unidad.alicuota))
+                        ? `${parseFloat(unidad.alicuota).toFixed(2)}%`
+                        : <span className="text-gray-400">N/E</span>}
+                    </td>
                     <td className="py-3 px-2 md:px-4 align-middle text-center whitespace-nowrap">{unidad && unidad.usuario_email ? unidad.usuario_email : <span className="text-gray-400">N/E</span>}</td>
                     <td className="py-3 px-2 md:px-4 align-middle flex gap-2 justify-center">
                       <button
@@ -245,7 +254,7 @@ export default function UnidadesPage() {
               })
             ) : (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-gray-400">Seleccione sector para ver unidades.</td>
+                <td colSpan={7} className="py-8 text-center text-gray-400">Seleccione sector para ver unidades.</td>
               </tr>
             )}
           </tbody>
@@ -268,6 +277,7 @@ export default function UnidadesPage() {
                 identificador: payload.identificador,
                 telefono: payload.telefono ?? null,
                 propietario: payload.propietario ?? null,
+                alicuota: typeof payload.alicuota === 'number' ? payload.alicuota : 0,
               }),
             });
             const data = await res.json().catch(() => ({}));
@@ -325,9 +335,10 @@ export default function UnidadesPage() {
               setError(msg);
               return;
             }
-            setUnidades(prev => prev.filter(u => u.id !== toDelete.id));
+            setUnidades(prev => prev.filter(u => u.id !== toDelete.id).map(u => u.id === toDelete.id ? { ...u, usuario_email: null } : u));
             setConfirmOpen(false);
             setToDelete(null);
+            setToast({ show: true, message: 'Unidad eliminada correctamente', type: 'success' });
           } catch (e) {
             setError('Error de red al eliminar la unidad');
           }

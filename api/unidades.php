@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $propietario = array_key_exists('propietario', $input) ? trim((string)$input['propietario']) : null;
     $dni = array_key_exists('dni', $input) ? trim((string)$input['dni']) : null;
     $telefono = array_key_exists('telefono', $input) ? trim((string)$input['telefono']) : null;
+    $alicuota = array_key_exists('alicuota', $input) ? floatval($input['alicuota']) : null;
 
     if ($identificador === '') {
         http_response_code(400);
@@ -63,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($propietario !== null) { $sets[] = 'propietario = ?'; $types .= 's'; $params[] = $propietario; }
         if ($dni !== null) { $sets[] = 'dni = ?'; $types .= 's'; $params[] = $dni; }
         if ($telefono !== null) { $sets[] = 'telefono = ?'; $types .= 's'; $params[] = $telefono; }
+        if ($alicuota !== null) { $sets[] = 'alicuota = ?'; $types .= 'd'; $params[] = $alicuota; }
         $types .= 'i';
         $params[] = $id;
         $sql = 'UPDATE unidades SET ' . implode(', ', $sets) . ' WHERE id = ?';
@@ -91,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($propietario !== null) { $sets[] = 'propietario = ?'; $types .= 's'; $params[] = $propietario; }
             if ($dni !== null) { $sets[] = 'dni = ?'; $types .= 's'; $params[] = $dni; }
             if ($telefono !== null) { $sets[] = 'telefono = ?'; $types .= 's'; $params[] = $telefono; }
+            if ($alicuota !== null) { $sets[] = 'alicuota = ?'; $types .= 'd'; $params[] = $alicuota; }
             $types .= 'i';
             $params[] = $id;
             $sql = 'UPDATE unidades SET ' . implode(', ', $sets) . ' WHERE id = ?';
@@ -104,8 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
         } else {
             // Crear nueva unidad acorde al esquema actual
-            $stmt = $conn->prepare('INSERT INTO unidades (identificador, estado, sector_id, numero_orden, propietario, dni, telefono) VALUES (?, NULL, ?, ?, ?, ?, ?)');
-            $stmt->bind_param('siisss', $identificador, $sector_id, $numero_orden, $propietario, $dni, $telefono);
+            $stmt = $conn->prepare('INSERT INTO unidades (identificador, estado, sector_id, numero_orden, propietario, dni, telefono, alicuota) VALUES (?, NULL, ?, ?, ?, ?, ?, ?)');
+            $stmt->bind_param('siisssd', $identificador, $sector_id, $numero_orden, $propietario, $dni, $telefono, $alicuota);
             if (!$stmt->execute()) {
                 http_response_code(500);
                 echo json_encode(['error' => 'No se pudo crear la unidad']);
@@ -120,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->prepare('
         SELECT 
             u.id, u.sector_id, u.numero_orden, u.identificador, 
-            u.propietario AS propietario_nombre, u.dni, u.telefono,
+            u.propietario AS propietario_nombre, u.dni, u.telefono, u.alicuota,
             COALESCE(MAX(us.email), NULL) AS usuario_email
         FROM unidades u
         LEFT JOIN usuario_unidad uu ON uu.unidad_id = u.id
@@ -146,15 +149,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         exit;
     }
     $id = intval($_GET['id']);
-    $stmt = $conn->prepare('DELETE FROM unidades WHERE id = ?');
-    $stmt->bind_param('i', $id);
-    if (!$stmt->execute()) {
+    // Eliminar en transacción: primero relaciones en usuario_unidad, luego la unidad
+    $conn->begin_transaction();
+    try {
+        // Borrar relaciones usuario_unidad si existen
+        $stmtRel = $conn->prepare('DELETE FROM usuario_unidad WHERE unidad_id = ?');
+        $stmtRel->bind_param('i', $id);
+        if (!$stmtRel->execute()) {
+            throw new Exception('No se pudo eliminar relaciones usuario_unidad');
+        }
+        $stmtRel->close();
+
+        // Borrar la unidad
+        $stmt = $conn->prepare('DELETE FROM unidades WHERE id = ?');
+        $stmt->bind_param('i', $id);
+        if (!$stmt->execute()) {
+            throw new Exception('No se pudo eliminar la unidad');
+        }
+        $stmt->close();
+
+        $conn->commit();
+        echo json_encode(['ok' => true]);
+    } catch (Exception $e) {
+        $conn->rollback();
         http_response_code(500);
-        echo json_encode(['error' => 'No se pudo eliminar la unidad']);
-        exit;
+        echo json_encode(['error' => $e->getMessage() ?: 'Error al eliminar la unidad']);
     }
-    $stmt->close();
-    echo json_encode(['ok' => true]);
     exit;
 }
 
@@ -164,7 +184,7 @@ if (isset($_GET['id'])) {
     $stmt = $conn->prepare('
         SELECT 
             u.id, u.sector_id, u.numero_orden, u.identificador,
-            u.propietario AS propietario_nombre, u.dni, u.telefono,
+            u.propietario AS propietario_nombre, u.dni, u.telefono, u.alicuota,
             COALESCE(MAX(us.email), NULL) AS usuario_email
         FROM unidades u
         LEFT JOIN usuario_unidad uu ON uu.unidad_id = u.id
@@ -190,7 +210,7 @@ if (isset($_GET['sector_id'])) {
     $sector_id = intval($_GET['sector_id']);
     $stmt = $conn->prepare('
         SELECT 
-            u.id, u.sector_id, u.numero_orden, u.identificador, u.telefono,
+            u.id, u.sector_id, u.numero_orden, u.identificador, u.telefono, u.alicuota,
             u.propietario AS propietario_nombre, u.dni,
             COALESCE(MAX(us.email), NULL) AS usuario_email
         FROM unidades u
@@ -212,7 +232,7 @@ if (isset($_GET['sector_id'])) {
     $stmt = $conn->prepare('
         SELECT 
             u.id, u.sector_id, u.numero_orden, u.identificador, 
-            u.propietario AS propietario_nombre, u.dni, u.telefono,
+            u.propietario AS propietario_nombre, u.dni, u.telefono, u.alicuota,
             COALESCE(MAX(us.email), NULL) AS usuario_email
         FROM unidades u
         INNER JOIN sectores s ON u.sector_id = s.id
@@ -232,7 +252,7 @@ if (isset($_GET['sector_id'])) {
 } else {
     $result = $conn->query('SELECT 
             u.id, u.sector_id, u.numero_orden, u.identificador,
-            u.propietario AS propietario_nombre, u.dni, u.telefono,
+            u.propietario AS propietario_nombre, u.dni, u.telefono, u.alicuota,
             COALESCE(MAX(us.email), NULL) AS usuario_email
         FROM unidades u
         LEFT JOIN usuario_unidad uu ON uu.unidad_id = u.id

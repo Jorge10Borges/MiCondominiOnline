@@ -6,11 +6,13 @@ import SectoresPage from './admin/pages/SectoresPage';
 import DashboardPropietario from './residencia/pages/Dashboard';
 import Dashboard from './admin/pages/Dashboard';
 import Usuarios from './admin/pages/Usuarios';
+import GastosPage from './admin/pages/Gastos';
+import CobrosPage from './admin/pages/Cobros';
 
 import './App.css';
 
 import MainLayout from './layout/MainLayout';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginAdmin from './admin/pages/LoginAdmin';
 import CambiarPassword from './admin/pages/CambiarPassword';
 import LoginPropietario from './residencia/pages/LoginPropietario';
@@ -43,6 +45,11 @@ function App() {
             <Usuarios />
           </AdminLayout>
         } />
+        <Route path="/admin/sectores" element={
+          <AdminLayout>
+            <SectoresPage />
+          </AdminLayout>
+        } />
         <Route path="/admin/login" element={
           <AdminLayout>
             <LoginAdmin />
@@ -56,6 +63,16 @@ function App() {
         <Route path="/admin/dashboard" element={
           <AdminLayout>
             <Dashboard />
+          </AdminLayout>
+        } />
+        <Route path="/admin/cobros" element={
+          <AdminLayout>
+            <CobrosPage />
+          </AdminLayout>
+        } />
+        <Route path="/admin/gastos" element={
+          <AdminLayout>
+            <GastosPage />
           </AdminLayout>
         } />
         <Route path="/propietario/login" element={
@@ -79,6 +96,7 @@ function App() {
             <p className="mt-4">Aquí puedes gestionar tu comunidad de propietarios de manera eficiente.</p>
           </MainLayout>
         } />
+  <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Routes>
     </Router>
   );
