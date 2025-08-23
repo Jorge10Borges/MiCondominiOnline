@@ -1,4 +1,3 @@
-
 import Organizaciones from './admin/pages/Organizaciones';
 import PropietariosPage from './admin/pages/Propietarios';
 import UnidadesPage from './admin/pages/Unidades';
@@ -8,6 +7,8 @@ import Dashboard from './admin/pages/Dashboard';
 import Usuarios from './admin/pages/Usuarios';
 import GastosPage from './admin/pages/Gastos';
 import CobrosPage from './admin/pages/Cobros';
+import RecibosAdmin from './admin/pages/RecibosAdmin'; // detalle de recibos por unidad
+import RecibosResumen from './admin/pages/RecibosResumen'; // resumen por periodo
 
 import './App.css';
 
@@ -73,6 +74,16 @@ function App() {
         <Route path="/admin/gastos" element={
           <AdminLayout>
             <GastosPage />
+          </AdminLayout>
+        } />
+        <Route path="/admin/recibos" element={
+          <AdminLayout>
+            <RecibosResumen />
+          </AdminLayout>
+        } />
+        <Route path="/admin/recibos/detalle" element={
+          <AdminLayout>
+            <RecibosAdmin />
           </AdminLayout>
         } />
         <Route path="/propietario/login" element={
