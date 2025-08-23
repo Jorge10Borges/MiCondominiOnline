@@ -67,6 +67,7 @@ const Nav = () => {
               </button>
               <ul className="absolute left-0 top-full bg-white text-gray-800 rounded shadow-lg min-w-[150px] py-2 z-50 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-opacity">
                 <li><Link to="/admin/cobros" className="block px-4 py-2 hover:bg-blue-50" tabIndex={0}>Cobros</Link></li>
+                <li><Link to="/admin/recibos/crear" className="block px-4 py-2 hover:bg-blue-50" tabIndex={0}>Crear Recibo</Link></li>
                 <li><Link to="/admin/recibos" className="block px-4 py-2 hover:bg-blue-50" tabIndex={0}>Recibos (Resumen)</Link></li>
                 <li><Link to="/admin/recibos/detalle" className="block px-4 py-2 hover:bg-blue-50" tabIndex={0}>Recibos Detalle</Link></li>
                 <li><Link to="/admin/gastos" className="block px-4 py-2 hover:bg-blue-50" tabIndex={0}>Gastos</Link></li>
@@ -101,6 +102,7 @@ const Nav = () => {
           <li><Link to="/admin/propietarios" className="hover:underline" onClick={() => setOpen(false)}>Propietarios</Link></li>
           <li className="font-semibold mt-2">Finanzas</li>
           <li><Link to="/admin/cobros" className="hover:underline" onClick={() => setOpen(false)}>Cobros</Link></li>
+          <li><Link to="/admin/recibos/crear" className="hover:underline" onClick={() => setOpen(false)}>Crear Recibo</Link></li>
           <li><Link to="/admin/recibos" className="hover:underline" onClick={() => setOpen(false)}>Recibos (Resumen)</Link></li>
           <li><Link to="/admin/recibos/detalle" className="hover:underline" onClick={() => setOpen(false)}>Recibos Detalle</Link></li>
           <li><Link to="/admin/gastos" className="hover:underline" onClick={() => setOpen(false)}>Gastos</Link></li>

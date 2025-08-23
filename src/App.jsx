@@ -9,6 +9,7 @@ import GastosPage from './admin/pages/Gastos';
 import CobrosPage from './admin/pages/Cobros';
 import RecibosAdmin from './admin/pages/RecibosAdmin'; // detalle de recibos por unidad
 import RecibosResumen from './admin/pages/RecibosResumen'; // resumen por periodo
+import ReciboCrear from './admin/pages/ReciboCrear'; // crear recibo global
 
 import './App.css';
 
@@ -79,6 +80,11 @@ function App() {
         <Route path="/admin/recibos" element={
           <AdminLayout>
             <RecibosResumen />
+          </AdminLayout>
+        } />
+        <Route path="/admin/recibos/crear" element={
+          <AdminLayout>
+            <ReciboCrear />
           </AdminLayout>
         } />
         <Route path="/admin/recibos/detalle" element={
